@@ -20,21 +20,16 @@ const PromptCardList = ({ data, handleTagClick }) => {
 
 const Feed = () => {
   const [allPosts, setAllPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Search states
-  const [searchText, setSearchText] = useState("");
-  const [searchedResults, setSearchedResults] = useState([]);
-
-  const fetchPosts = async (query = "") => {
+  const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/prompt?search=${query}`);
+      const response = await fetch("/api/prompt");
       if (!response.ok) throw new Error("Failed to fetch prompts");
       const data = await response.json();
       setAllPosts(data);
-      if (query) setSearchedResults(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -45,17 +40,6 @@ const Feed = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
-
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchText(query);
-    fetchPosts(query);
-  };
-
-  const handleTagClick = (tagName) => {
-    setSearchText(tagName);
-    fetchPosts(tagName);
-  };
 
   return (
     <section className="feed">
@@ -74,18 +58,12 @@ const Feed = () => {
       {loading && <p>Loading prompts...</p>}
       {error && <p>Error: {error}</p>}
 
-      {/* All Prompts or Search Results */}
+      {/* Display Prompts */}
       {!loading && !error && (
-        <>
-          {searchText && searchedResults.length === 0 ? (
-            <p>No results found for "{searchText}".</p>
-          ) : (
-            <PromptCardList
-              data={searchText ? searchedResults : allPosts}
-              handleTagClick={handleTagClick}
-            />
-          )}
-        </>
+        <PromptCardList
+          data={searchText ? searchedResults : allPosts}
+          handleTagClick={handleTagClick}
+        />
       )}
     </section>
   );
